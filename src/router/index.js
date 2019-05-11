@@ -1,8 +1,23 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Layout from '@/components/Layout'
+import Cookies from 'js-cookie'
+import { setAuthHeader } from '@/api/app'
 
 Vue.use(VueRouter)
+
+const requireAuth = (to, from, next) => {
+  setAuthHeader(Cookies.get('token'))
+    .then(res => {
+      alert(res.data.data)
+      next()
+    })
+    .catch(err => {
+      Cookies.remove('token')
+      alert(err.response.data.data)
+      next()
+    })
+}
 
 const routes = [
 
@@ -33,6 +48,7 @@ const routes = [
   {
     path: '/notice',
     component: Layout,
+    beforeEnter: requireAuth,
     children: [
       {
         path: 'list',
@@ -76,5 +92,6 @@ const routes = [
 ]
 
 export default new VueRouter({
-  routes
+  routes,
+  mode:'history'
 })
